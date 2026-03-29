@@ -37,6 +37,19 @@ class BasePile(ABC):
         self._nodetaglist: list | None = None #node tags set during building
         self._eletaglist: list | None = None #element tags set during building
         self.set_XY(XY)
+        self._edges = (Zbot, Zbot + L)
+
+    def __add__(self, other):
+        if not isinstance(other, BasePile):
+            return NotImplemented
+        new_L = self.L + other.L
+        new_dz = min(self.dz, other.dz)  # Use the smaller dz for finer discretization
+        new_Zbtm = min(self.Zbtm, other.Zbtm)  # Use the shallower Zbtm for the combined pile
+        new_cross = self.cross  # first object dominates
+        new_material = self.material  # first object dominates
+        new_XY = self._XY  # first object dominates
+        return self._combine_with(new_L, new_dz, new_Zbtm, new_cross, new_material, new_XY=new_XY)
+
 
  
     def _get_sectional_properties(self) -> tuple:
@@ -103,3 +116,26 @@ class BasePile(ABC):
         """
         pass
 
+    @abstractmethod
+    def _combine_with(self, new_L, new_dz, new_Zbtm, new_cross, new_material,new_XY) -> 'BasePile':
+        """Combines this pile with another pile to create a new pile with properties that are a combination of the two.
+
+        Parameters
+        ----------
+        new_L : float
+            The length of the combined pile.
+        new_dz : float
+            The discretization step for the combined pile.
+        new_Zbtm : float
+            The bottom depth of the combined pile.
+        new_cross : CrossSection
+            The cross-sectional properties of the combined pile.
+        new_material : Material
+            The material properties of the combined pile.
+
+        Returns
+        -------
+        BasePile
+            A new pile that is a combination of this pile and the other pile.
+        """
+        ...

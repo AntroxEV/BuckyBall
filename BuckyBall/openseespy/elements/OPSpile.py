@@ -64,3 +64,5 @@ class Pile(BasePile):
             self._add_element(self._element_type, _tagEle, _taglist[i])
         self._eletaglist = _elelist
 
+    def _combine_with(self, new_L, new_dz, new_Zbtm, new_cross, new_material,new_XY) -> 'Pile':        
+        return Pile(new_L, new_dz, new_Zbtm, new_cross, new_material, XY=new_XY)
