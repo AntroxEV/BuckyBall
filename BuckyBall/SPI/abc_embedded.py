@@ -7,7 +7,7 @@ It is a generic wrapper class to add soil-pile interaction elements to the pile 
 
 """
 from abc import ABC, abstractmethod
-from abc_pile import BasePile
+from BuckyBall.elements.abc_pile import BasePile
 from SPIcontainer import SPI
 
 class BaseEmbedded(ABC):
@@ -34,7 +34,6 @@ class BaseEmbedded(ABC):
             if hasattr(self._cspi, name):
                 return getattr(self._cspi, name)
             raise AttributeError(name)
-
 
 
         @abstractmethod
