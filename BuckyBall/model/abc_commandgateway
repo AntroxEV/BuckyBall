@@ -1,0 +1,49 @@
+'''
+Abstract base class for command buffer gateways.
+
+@author: Dr Alessandro Tombari
+'''
+from abc import ABC, abstractmethod
+import logging, json
+
+class CommandBufferGateway(ABC):
+
+    def __init__(self, json_log="commands.json", txt_log="commands.txt"):
+        self.buffer = []
+
+        # JSON logger
+        self.json_logger = logging.getLogger("JSONLogger")
+        self.json_logger.setLevel(logging.INFO)
+        if not self.json_logger.handlers:
+            h = logging.FileHandler(json_log)
+            h.setFormatter(logging.Formatter("%(message)s"))
+            self.json_logger.addHandler(h)
+
+        # TXT logger
+        self.txt_logger = logging.getLogger("TXTLogger")
+        self.txt_logger.setLevel(logging.INFO)
+        if not self.txt_logger.handlers:
+            h = logging.FileHandler(txt_log)
+            h.setFormatter(logging.Formatter("%(message)s"))
+            self.txt_logger.addHandler(h)
+
+    def _add_command(self, func, *args):
+        """Store the command (NO EXECUTION YET)."""
+        entry = {"command": func.__name__, "args": args}
+        self.buffer.append((func, args))
+
+         # Log JSON
+        self.json_logger.info(json.dumps(entry))
+        # Log human-readable TXT
+        txt = f"{func.__name__}({', '.join(map(str,args))})"
+        self.txt_logger.info(txt)
+
+    def _execute_all(self):
+        """Execute all buffered commands in order."""
+        for func, args in self.buffer:
+            func(*args)
+
+    @abstractmethod
+    def _WrapUp(self):
+        """Concrete classes must implement this."""
+        pass

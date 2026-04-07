@@ -1,0 +1,14 @@
+'''
+Concrete Class for OpenSeesPy Command Buffer Gateway.
+
+@author: Dr Alessandro Tombari
+'''
+
+import openseespy.opensees as ops
+from BuckyBall.model.abc_commandgateway import CommandBufferGateway
+
+class OpsGateway(CommandBufferGateway):
+
+    def _WrapUp(self):
+        """Concrete implementation of the wrap-up method for OpenSeesPy."""
+        self._execute_all()
