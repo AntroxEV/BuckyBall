@@ -7,6 +7,7 @@ Abstract Class for Pile Properties and Methods.
 -------------
 """
 from abc import ABC, abstractmethod
+from typing import Literal
 from BuckyBall.shared.adc_cross_section import CrossSection
 from BuckyBall.materials.adc_standardmat import UniaxialMaterial
 from BuckyBall.shared.abc_modelregistry import ModelRegistry
@@ -38,6 +39,7 @@ class BasePile(ABC):
         self._eletaglist: list | None = None #element tags set during building
         self.set_XY(XY)
         self._edges = (Zbot, Zbot + L)
+        self._connection = "free"  # Default connection type
 
     def __add__(self, other):
         if not isinstance(other, BasePile):
@@ -88,11 +90,26 @@ class BasePile(ABC):
         -------
         list
             A list of depth values representing the discretized segments of the pile.
-        """
+        """      
         _zlist=[self.Zbtm + i * self.dz for i in range(0,int(self.L / self.dz) + 1)]
         if self.L % self.dz != 0:
             _zlist.append(self.Zbtm + self.L)  # Ensure the last node is at the pile tip
+        
+        match self._connection:
+            case "start":
+                _zlist = _zlist[1:]  # Remove the first node (pile base)
+            case "end":
+                _zlist = _zlist[:-1]  # Remove the last node (pile tip)
+            case "free":
+                # Do not remove any nodes
+                pass
+            case _:
+                raise ValueError(f"Invalid connection type: {self._connection}. Supported types are: 'start', 'end', 'free'.")
+
         return _zlist
+
+    def _set_connection(self, connection: Literal["start", "end", "free"] = "free"):
+        self._connection = connection
     
     def _set_ModelRegistry(self, model_name: str, registry: ModelRegistry) -> None: 
         """set the singleton instance of the model registry.
