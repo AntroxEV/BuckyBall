@@ -15,17 +15,24 @@ from abc import ABC, abstractmethod
 from BuckyBall.elements.abc_pile import BasePile
 from BuckyBall.SPI.abc_embedded import BaseEmbedded
 from typing import TypeVar, Generic, Union, List
+from BuckyBall.shared.builderregistry import ModelBuilderRegistry
 
 Pile=TypeVar('Pile', bound=BasePile)
 Embedded=TypeVar('Embedded', bound=BaseEmbedded)
 PileType=Union[Pile, Embedded]
 
+
 class BaseCompositePile(ABC, Generic[Pile,Embedded]): 
+    
+    app_name: str #must be defined in subclass to specify the third-party application to wrap (e.g., "OpenSees", "Plaxis", etc.)
 
     def __init__(self, segments: List[PileType]):
         if not all(isinstance(seg, (BasePile, BaseEmbedded)) for seg in segments):
             raise TypeError("All segments must be instances of BasePile or BaseEmbedded.")
         self._segments = segments
+        #self-registration in the ModelBuilderRegistry:
+        ModelBuilderRegistry._register(self.app_name, self.__class__, self)  # Register the instance in the ModelBuilderRegistry
+
 
     def __add__(self, other):
         if isinstance(other, BaseCompositePile):

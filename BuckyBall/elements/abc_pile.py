@@ -11,6 +11,7 @@ from typing import Literal
 from BuckyBall.shared.adc_cross_section import CrossSection
 from BuckyBall.materials.adc_standardmat import UniaxialMaterial
 from BuckyBall.shared.abc_modelregistry import ModelRegistry
+from BuckyBall.shared.builderregistry import ModelBuilderRegistry
 
 class BasePile(ABC):
     """
@@ -27,7 +28,8 @@ class BasePile(ABC):
     cross: CrossSection
         cross-sectional dataclass for properties of the pile (e.g., area, moment of inertia)  
     """
-
+    app_name: str #must be defined in subclass to specify the third-party application to wrap (e.g., "OpenSees", "Plaxis", etc.)
+    
     def __init__(self, L: float, dz: float, Zbot: float, cross: CrossSection, material: UniaxialMaterial, *, XY: tuple | None = None):
         self.L = L
         self.dz = dz
@@ -40,6 +42,8 @@ class BasePile(ABC):
         self.set_XY(XY)
         self._edges = (Zbot, Zbot + L)
         self._connection = "free"  # Default connection type
+        #self-registration in the ModelBuilderRegistry:
+        ModelBuilderRegistry._register(self.app_name, self.__class__, self)  # Register the instance in the ModelBuilderRegistry
 
     def __add__(self, other):
         if not isinstance(other, BasePile):

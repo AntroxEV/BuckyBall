@@ -1,0 +1,41 @@
+'''
+Abstract class for Model Builder.
+It is a collector class that reads the registered objects in the ModelBuilderRegistry and builds the model in the FEM solver.
+It defines the abstract methods that must be implemented by the concrete Model Builder classes to build the model in the FEM solver.
+It is used to execute the building process in the FEM solver, by calling the _build_FEM method of the registered objects in the ModelBuilderRegistry.
+The building process is specific to the FEM solver and is defined in the concrete Model Builder classes.
+
+@author: Dr Alessandro Tombari
+'''
+from abc import ABC, abstractmethod
+from BuckyBall.shared.builderregistry import ModelBuilderRegistry
+from typing import Type, Any, List
+
+class BaseModelBuilder(ABC):
+
+    app_name: str #must be defined in subclass to specify the third-party application to wrap (e.g., "OpenSees", "Plaxis", etc.)
+
+    
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        if not hasattr(cls, "app_name"):
+            raise TypeError(f"{cls.__name__} must define class attribute 'app_name'")
+
+
+    def _collect(self,role: Type[Any] ) -> List[Any]:
+        """
+        Collects the registered objects in the ModelBuilderRegistry for the specific app_name and role.
+        Returns a list of the collected objects.
+        """
+        return ModelBuilderRegistry._get_list_obj(self.app_name, role)
+    
+    @abstractmethod
+    def build_all(self, *args, **kwargs) -> None:
+        """
+        Orchestrate the building of all registered ModelBuilder objects
+        for this FEM solver.
+        The concrete Collector defines how models are built, in which order,
+        and how external solver APIs are invoked.
+        """
+        pass
+

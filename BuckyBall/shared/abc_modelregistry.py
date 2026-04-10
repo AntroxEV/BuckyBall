@@ -4,8 +4,7 @@ Abstract Class for Model Registry
 Use for recording tags and metadata for various models.
 
 @author: Dr Alessandro Tombari
-@author: Dr Giovanni Nicosia Li Destri
-@funder: COWI Fonden 
+
 
 """
 
